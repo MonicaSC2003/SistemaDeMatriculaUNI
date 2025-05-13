@@ -39,12 +39,10 @@ builder.Services.AddScoped<IUsuarioDAL, DALUsuarioImpl>();
 builder.Services.AddScoped<IUnidadDeTrabajo, UnidadDeTrabajo>();
 // Registro de Servicios
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IHorarioService, HorarioService>();
+builder.Services.AddScoped<ICursoService, CursoService>();
 
 var app = builder.Build();
-
-
-
-
 #endregion
 
 // Configure the HTTP request pipeline.

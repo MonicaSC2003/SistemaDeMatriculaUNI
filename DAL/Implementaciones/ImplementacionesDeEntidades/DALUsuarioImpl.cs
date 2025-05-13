@@ -33,6 +33,7 @@ namespace DAL.Implementaciones.ImplementacionesDeEntidades
             var result = _context.Usuarios.FromSqlRaw(query);
             return result.ToList();
         }
+
         public List<Usuario> GetUsuariosByRolYCarrera(string rol, string carrera)
         {
             var query = "EXEC sp_GetUsuariosByRolYCarrera @Rol, @Carrera";
@@ -46,6 +47,7 @@ namespace DAL.Implementaciones.ImplementacionesDeEntidades
             var result = _context.Usuarios.FromSqlRaw(query, parameters);
             return result.ToList();
         }
+
         public Usuario GetUsuarioPorId(int id)
         {
             var query = "EXEC sp_GetUsuarioPorId @UsuarioId";
@@ -55,6 +57,7 @@ namespace DAL.Implementaciones.ImplementacionesDeEntidades
             var result = _context.Usuarios.FromSqlRaw(query, parameter).AsEnumerable().FirstOrDefault();
             return result;
         }
+
         public new bool Add(Usuario usuario)
         {
             try
@@ -82,6 +85,7 @@ namespace DAL.Implementaciones.ImplementacionesDeEntidades
                 return false;
             }
         }
+
         public bool VerificarUsuario(int usuarioId, int numeroVerificacion)
         {
             try
@@ -102,6 +106,7 @@ namespace DAL.Implementaciones.ImplementacionesDeEntidades
                 return false;
             }
         }
+
         public bool CambiarContrasena(int usuarioId, string contrasenaActual, string contrasenaNueva)
         {
             try
@@ -123,6 +128,7 @@ namespace DAL.Implementaciones.ImplementacionesDeEntidades
                 return false;
             }
         }
+
         public Usuario LoginUsuario(string correo, string contrasena)
         {
             try
@@ -143,6 +149,5 @@ namespace DAL.Implementaciones.ImplementacionesDeEntidades
                 return null;
             }
         }
-
     }
 }
