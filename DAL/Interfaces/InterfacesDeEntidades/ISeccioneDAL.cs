@@ -9,5 +9,6 @@ namespace DAL.Interfaces.InterfacesDeEntidades
 {
     public interface ISeccioneDAL : IDALGenerico<Seccione>
     {
+        List<Seccione> GetSeccionesbyCarrera(string carrera);
     }
 }
