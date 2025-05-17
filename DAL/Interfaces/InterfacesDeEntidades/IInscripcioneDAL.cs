@@ -9,5 +9,7 @@ namespace DAL.Interfaces.InterfacesDeEntidades
 {
     public interface IInscripcioneDAL : IDALGenerico<Inscripcione>
     {
+        List<Inscripcione> GetInscripcionesPorUsuario(int id);
+        List<Inscripcione> ListarUsuariosPorSeccion(int id);
     }
 }
