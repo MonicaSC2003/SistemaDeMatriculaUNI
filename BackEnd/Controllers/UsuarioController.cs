@@ -15,8 +15,8 @@ namespace BackEnd.Controllers
             _usuarioService = usuarioService;
         }
 
-        // GET: api/Usuario/obtenertodoslosusuarios
-        [HttpGet("obtenertodoslosusuarios")]
+        // GET: api/Usuario/GetTodosLosUsuarios
+        [HttpGet("GetTodosLosUsuarios")]
         public IActionResult GetTodosLosUsuarios()
         {
             try
@@ -30,8 +30,8 @@ namespace BackEnd.Controllers
             }
         }
 
-        // GET: api/Usuario/obtenerporid/{id}
-        [HttpGet("obtenerporid/{id}")]
+        // GET: api/Usuario/GetUsuarioPorId/{id}
+        [HttpGet("GetUsuarioPorId/{id}")]
         public IActionResult GetUsuarioPorId(int id)
         {
             try
@@ -39,7 +39,6 @@ namespace BackEnd.Controllers
                 var usuario = _usuarioService.GetUsuarioPorId(id);
                 if (usuario == null)
                     return NotFound($"Usuario con ID {id} no encontrado");
-
                 return Ok(usuario);
             }
             catch (Exception ex)
@@ -48,15 +47,12 @@ namespace BackEnd.Controllers
             }
         }
 
-        // GET: api/Usuario/obtenerporrolycarrera
-        [HttpGet("obtenerporrolycarrera")]
+        // GET: api/Usuario/GetUsuariosByRolYCarrera
+        [HttpGet("GetUsuariosByRolYCarrera")]
         public IActionResult GetUsuariosByRolYCarrera([FromQuery] string rol, [FromQuery] string carrera)
         {
             try
             {
-                if (string.IsNullOrEmpty(rol) || string.IsNullOrEmpty(carrera))
-                    return BadRequest("Rol y carrera son requeridos");
-
                 var usuarios = _usuarioService.GetUsuariosByRolYCarrera(rol, carrera);
                 return Ok(usuarios);
             }
@@ -66,58 +62,19 @@ namespace BackEnd.Controllers
             }
         }
 
-        // POST: api/Usuario/crear
-        [HttpPost("crear")]
+        // POST: api/Usuario/AddUsuario
+        [HttpPost("AddUsuario")]
         public IActionResult AddUsuario([FromBody] UsuarioDTO usuarioDTO)
         {
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    var errors = ModelState
-                        .Where(x => x.Value.Errors.Count > 0)
-                        .ToDictionary(
-                            kvp => kvp.Key,
-                            kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
-                        );
-                    return BadRequest(new { Errors = errors });
-                }
+                if (usuarioDTO == null)
+                    return BadRequest("El usuario no puede ser nulo");
 
-                var usuario = _usuarioService.AddUsuario(usuarioDTO);
-                if (usuario == null)
-                    return BadRequest("No se pudo crear el usuario");
-
-                return CreatedAtAction(nameof(GetUsuarioPorId), new { id = usuario.UsuarioId }, usuario);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    error = "Error al crear usuario",
-                    message = ex.Message,
-                    innerException = ex.InnerException?.Message
-                });
-            }
-        }
-
-
-        // PUT: api/Usuario/actualizar/{id}
-        [HttpPut("actualizar/{id}")]
-        public IActionResult UpdateUsuario(int id, [FromBody] UsuarioDTO usuarioDTO)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
-                if (id != usuarioDTO.UsuarioId)
-                    return BadRequest("El ID de la URL no coincide con el ID del usuario");
-
-                var usuarioActualizado = _usuarioService.UpdateUsuario(usuarioDTO);
-                if (usuarioActualizado == null)
-                    return NotFound($"Usuario con ID {id} no encontrado");
-
-                return Ok(usuarioActualizado);
+                var result = _usuarioService.AddUsuario(usuarioDTO);
+                if (result)
+                    return Ok("Usuario agregado exitosamente");
+                return BadRequest("Error al agregar el usuario");
             }
             catch (Exception ex)
             {
@@ -125,22 +82,19 @@ namespace BackEnd.Controllers
             }
         }
 
-        // POST: api/Usuario/login
-        [HttpPost("login")]
-        public IActionResult Login([FromQuery] string correo, [FromQuery] string contrasena)
+        // PUT: api/Usuario/UpdateUsuario
+        [HttpPut("UpdateUsuario")]
+        public IActionResult UpdateUsuario([FromBody] UsuarioDTO usuarioDTO)
         {
             try
             {
-                if (string.IsNullOrEmpty(correo) || string.IsNullOrEmpty(contrasena))
-                    return BadRequest("Correo y contraseña son requeridos");
+                if (usuarioDTO == null)
+                    return BadRequest("El usuario no puede ser nulo");
 
-                var usuario = _usuarioService.LoginUsuario(correo, contrasena);
-                if (usuario == null)
-                    return Unauthorized("Correo o contraseña incorrectos");
-
-                // No devolver la contraseña en la respuesta
-                usuario.Contrasena = null;
-                return Ok(usuario);
+                var result = _usuarioService.UpdateUsuario(usuarioDTO);
+                if (result)
+                    return Ok("Usuario actualizado exitosamente");
+                return BadRequest("Error al actualizar el usuario");
             }
             catch (Exception ex)
             {
@@ -148,20 +102,18 @@ namespace BackEnd.Controllers
             }
         }
 
-        // POST: api/Usuario/verificar/{id}
-        [HttpPost("verificar/{id}")]
-        public IActionResult VerificarUsuario(int id, [FromQuery] int numeroVerificacion)
+        // POST: api/Usuario/Login
+        [HttpPost("Login")]
+        public async Task<IActionResult> Login([FromBody] LoginDTO loginRequest)
         {
             try
             {
-                if (numeroVerificacion < 100000 || numeroVerificacion > 999999)
-                    return BadRequest("El número de verificación debe ser de 6 dígitos");
+                if (string.IsNullOrEmpty(loginRequest.Correo) || string.IsNullOrEmpty(loginRequest.Contrasena))
+                    return BadRequest("El correo y la contraseña son requeridos");
 
-                var resultado = _usuarioService.VerificarUsuario(id, numeroVerificacion);
-                if (!resultado)
-                    return BadRequest("No se pudo verificar el usuario");
+                var (estado, mensaje, usuario) = await _usuarioService.LoginUsuario(loginRequest.Correo, loginRequest.Contrasena);
 
-                return Ok(new { message = "Usuario verificado correctamente" });
+                return Ok(new { Estado = estado, Mensaje = mensaje, Usuario = usuario });
             }
             catch (Exception ex)
             {
@@ -169,24 +121,34 @@ namespace BackEnd.Controllers
             }
         }
 
-        // PUT: api/Usuario/cambiarcontrasena/{id}
-        [HttpPut("cambiarcontrasena/{id}")]
-        public IActionResult CambiarContrasena(int id, [FromQuery] string contrasenaActual, [FromQuery] string contrasenaNueva)
+        // POST: api/Usuario/VerificarUsuario
+        [HttpPost("VerificarUsuario")]
+        public async Task<IActionResult> VerificarUsuario([FromBody] VerificarUsuarioDTO verificacionRequest)
         {
             try
             {
-                if (string.IsNullOrEmpty(contrasenaActual) || string.IsNullOrEmpty(contrasenaNueva))
-                    return BadRequest("Contraseña actual y nueva contraseña son requeridas");
+                var (estado, mensaje) = await _usuarioService.VerificarUsuario(verificacionRequest.UsuarioId, verificacionRequest.NumeroVerificacion);
 
-                if (contrasenaNueva.Length < 6)
-                    return BadRequest("La nueva contraseña debe tener al menos 6 caracteres");
+                return Ok(new { Estado = estado, Mensaje = mensaje });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+            }
+        }
 
-                var resultado = _usuarioService.CambiarContrasena(id, contrasenaActual, contrasenaNueva);
+        // POST: api/Usuario/CambiarContrasena
+        [HttpPost("CambiarContrasena")]
+        public async Task<IActionResult> CambiarContrasena([FromBody] CambiarContrasenaDTO cambioRequest)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(cambioRequest.ContrasenaActual) || string.IsNullOrEmpty(cambioRequest.ContrasenaNueva))
+                    return BadRequest("Las contraseñas son requeridas");
 
-                if (!resultado)
-                    return BadRequest("No se pudo cambiar la contraseña");
+                var (estado, mensaje) = await _usuarioService.CambiarContrasena(cambioRequest.UsuarioId, cambioRequest.ContrasenaActual, cambioRequest.ContrasenaNueva);
 
-                return Ok(new { message = "Contraseña cambiada correctamente" });
+                return Ok(new { Estado = estado, Mensaje = mensaje });
             }
             catch (Exception ex)
             {

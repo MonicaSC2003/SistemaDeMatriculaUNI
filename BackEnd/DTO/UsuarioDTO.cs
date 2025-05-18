@@ -3,14 +3,14 @@
     public class UsuarioDTO
     {
         public int UsuarioId { get; set; }
-        public string Nombre { get; set; }
-        public string Apellido1 { get; set; }
-        public string Apellido2 { get; set; }
-        public string Identificacion { get; set; }
-        public string Rol { get; set; }
-        public string Carrera { get; set; }
-        public string Correo { get; set; }
-        public string Contrasena { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public string Apellido1 { get; set; } = string.Empty;
+        public string Apellido2 { get; set; } = string.Empty;
+        public string Identificacion { get; set; } = string.Empty;
+        public string Rol { get; set; } = string.Empty;
+        public string Carrera { get; set; } = string.Empty;
+        public string Correo { get; set; } = string.Empty;
+        public string? Contrasena { get; set; }
         public int? NumeroVerificacion { get; set; }
         public bool Activo { get; set; }
     }
