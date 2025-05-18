@@ -137,7 +137,7 @@ namespace BackEnd.Controllers
             }
         }
 
-        // POST: api/Usuario/CambiarContrasena
+        // POST: api/Usuario/CambiarContraseña
         [HttpPost("CambiarContrasena")]
         public async Task<IActionResult> CambiarContrasena([FromBody] CambiarContrasenaDTO cambioRequest)
         {
