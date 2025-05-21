@@ -42,6 +42,8 @@ builder.Services.AddScoped<IMailHelper, MailHelper>();
 builder.Services.AddScoped<IUnidadDeTrabajo, UnidadDeTrabajo>();
 // Registro de Servicios
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<ITipoEvaluacionService, TipoEvaluacionService>();
+builder.Services.AddScoped<IEvaluacionService, EvaluacionService>();
 builder.Services.AddScoped<IHorarioService, HorarioService>();
 builder.Services.AddScoped<ICursoService, CursoService>();
 

@@ -9,5 +9,6 @@ namespace DAL.Interfaces.InterfacesDeEntidades
 {
     public interface IEvaluacioneDAL : IDALGenerico<Evaluacione>
     {
+        List<Evaluacione> ObtenerEvaluacionesPorSeccion(int seccionId);
     }
 }
