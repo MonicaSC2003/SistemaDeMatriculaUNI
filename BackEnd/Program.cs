@@ -46,6 +46,7 @@ builder.Services.AddScoped<ITipoEvaluacionService, TipoEvaluacionService>();
 builder.Services.AddScoped<IEvaluacionService, EvaluacionService>();
 builder.Services.AddScoped<IHorarioService, HorarioService>();
 builder.Services.AddScoped<ICursoService, CursoService>();
+builder.Services.AddScoped<INotaService, NotaService>();
 
 var app = builder.Build();
 #endregion
