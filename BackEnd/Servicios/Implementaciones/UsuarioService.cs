@@ -62,28 +62,47 @@ namespace BackEnd.Servicios.Implementaciones
         {
             try
             {
+                // Generar número de verificación aleatorio de 6 dígitos (entre 100000 y 999999)
+                var random = new Random();
+                var numeroVerificacion = random.Next(100000, 1000000); // Cambiado para incluir 999999
+
+                // Asignar el número generado al DTO
+                usuarioDTO.NumeroVerificacion = numeroVerificacion;
+
+                // Por defecto, usuarios nuevos no están activos hasta que se verifiquen
+                usuarioDTO.Activo = false;
+
                 var usuario = ConvertToEntity(usuarioDTO);
 
-                // Si el usuario tiene número de verificación, enviar correo
-                if (usuario.NumeroVerificacion.HasValue)
+                // Primero intentamos agregar el usuario
+                var result = _unidadDeTrabajo.UsuarioDAL.Add(usuario);
+
+                if (result)
                 {
+                    _unidadDeTrabajo.Complete();
+
+                    // Si se agregó exitosamente, enviamos el correo de verificación
                     _ = Task.Run(async () =>
                     {
                         await _mailHelper.SendVerificationCodeAsync(
                             usuario.Correo,
                             $"{usuario.Nombre} {usuario.Apellido1}",
-                            usuario.NumeroVerificacion.Value
+                            numeroVerificacion
                         );
                     });
                 }
 
-                var result = _unidadDeTrabajo.UsuarioDAL.Add(usuario);
-                if (result)
-                    _unidadDeTrabajo.Complete();
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                // Log del error para debugging
+                Console.WriteLine($"Error en AddUsuario: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                }
                 throw;
             }
         }
@@ -92,6 +111,22 @@ namespace BackEnd.Servicios.Implementaciones
         {
             try
             {
+                // Al actualizar, NO modificamos el número de verificación ni el estado activo
+                // a menos que vengan explícitamente en el DTO
+                var usuarioExistente = _unidadDeTrabajo.UsuarioDAL.GetUsuarioPorId(usuarioDTO.UsuarioId);
+
+                if (usuarioExistente != null)
+                {
+                    // Si no viene número de verificación en el DTO, mantenemos el existente
+                    if (!usuarioDTO.NumeroVerificacion.HasValue)
+                    {
+                        usuarioDTO.NumeroVerificacion = usuarioExistente.NumeroVerificacion;
+                    }
+
+                    // Si no viene el estado activo, mantenemos el existente
+                    usuarioDTO.Activo = usuarioExistente.Activo;
+                }
+
                 var usuario = ConvertToEntity(usuarioDTO);
                 var result = _unidadDeTrabajo.UsuarioDAL.Update(usuario);
                 if (result)
@@ -103,6 +138,7 @@ namespace BackEnd.Servicios.Implementaciones
                 throw;
             }
         }
+
 
         public async Task<(int Estado, string Mensaje, UsuarioDTO? Usuario)> LoginUsuario(string correo, string contrasena)
         {

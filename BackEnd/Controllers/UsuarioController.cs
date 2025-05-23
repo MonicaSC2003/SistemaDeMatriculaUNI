@@ -64,16 +64,46 @@ namespace BackEnd.Controllers
 
         // POST: api/Usuario/AddUsuario
         [HttpPost("AddUsuario")]
-        public IActionResult AddUsuario([FromBody] UsuarioDTO usuarioDTO)
+        public IActionResult AddUsuario([FromBody] CrearUsuarioDTO crearUsuarioDTO)
         {
             try
             {
-                if (usuarioDTO == null)
+                if (crearUsuarioDTO == null)
                     return BadRequest("El usuario no puede ser nulo");
+
+                // Validar campos requeridos
+                if (string.IsNullOrWhiteSpace(crearUsuarioDTO.Nombre))
+                    return BadRequest("El nombre es requerido");
+                if (string.IsNullOrWhiteSpace(crearUsuarioDTO.Apellido1))
+                    return BadRequest("El primer apellido es requerido");
+                if (string.IsNullOrWhiteSpace(crearUsuarioDTO.Apellido2))
+                    return BadRequest("El segundo apellido es requerido");
+                if (string.IsNullOrWhiteSpace(crearUsuarioDTO.Identificacion))
+                    return BadRequest("La identificación es requerida");
+                if (string.IsNullOrWhiteSpace(crearUsuarioDTO.Rol))
+                    return BadRequest("El rol es requerido");
+                if (string.IsNullOrWhiteSpace(crearUsuarioDTO.Carrera))
+                    return BadRequest("La carrera es requerida");
+                if (string.IsNullOrWhiteSpace(crearUsuarioDTO.Correo))
+                    return BadRequest("El correo es requerido");
+                if (string.IsNullOrWhiteSpace(crearUsuarioDTO.Contrasena))
+                    return BadRequest("La contraseña es requerida");
+
+                var usuarioDTO = new UsuarioDTO
+                {
+                    Nombre = crearUsuarioDTO.Nombre,
+                    Apellido1 = crearUsuarioDTO.Apellido1,
+                    Apellido2 = crearUsuarioDTO.Apellido2,
+                    Identificacion = crearUsuarioDTO.Identificacion,
+                    Rol = crearUsuarioDTO.Rol,
+                    Carrera = crearUsuarioDTO.Carrera,
+                    Correo = crearUsuarioDTO.Correo,
+                    Contrasena = crearUsuarioDTO.Contrasena
+                };
 
                 var result = _usuarioService.AddUsuario(usuarioDTO);
                 if (result)
-                    return Ok("Usuario agregado exitosamente");
+                    return Ok(new { mensaje = "Usuario agregado exitosamente. Se ha enviado un código de verificación al correo proporcionado." });
                 return BadRequest("Error al agregar el usuario");
             }
             catch (Exception ex)
@@ -90,6 +120,9 @@ namespace BackEnd.Controllers
             {
                 if (usuarioDTO == null)
                     return BadRequest("El usuario no puede ser nulo");
+
+                // Para actualización, no permitimos cambiar el número de verificación desde el API
+                usuarioDTO.NumeroVerificacion = null;
 
                 var result = _usuarioService.UpdateUsuario(usuarioDTO);
                 if (result)
