@@ -6,6 +6,8 @@ using DAL.Implementaciones;
 using DAL.Implementaciones.ImplementacionesDeEntidades;
 using BackEnd.Servicios.Interfaces;
 using BackEnd.Servicios.Implementaciones;
+using BackEnd.Helpers.Implementaciones;
+using BackEnd.Helpers.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,13 +36,17 @@ builder.Services.AddScoped<INotaDAL, DALNotaImpl>();
 builder.Services.AddScoped<ISeccioneDAL, DALSeccioneImpl>();
 builder.Services.AddScoped<ITipoEvaluacioneDAL, DALTipoEvaluacioneImpl>();
 builder.Services.AddScoped<IUsuarioDAL, DALUsuarioImpl>();
+builder.Services.AddScoped<IMailHelper, MailHelper>();
 
 // Registro de Unidad de Trabajo
 builder.Services.AddScoped<IUnidadDeTrabajo, UnidadDeTrabajo>();
 // Registro de Servicios
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<ITipoEvaluacionService, TipoEvaluacionService>();
+builder.Services.AddScoped<IEvaluacionService, EvaluacionService>();
 builder.Services.AddScoped<IHorarioService, HorarioService>();
 builder.Services.AddScoped<ICursoService, CursoService>();
+builder.Services.AddScoped<INotaService, NotaService>();
 
 var app = builder.Build();
 #endregion
